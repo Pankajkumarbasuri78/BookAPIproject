@@ -348,12 +348,10 @@ Methods         PUT
 */
 
 
-
-
 booky.put("/publication/update/book/:isbn", (request,response) => {
     // update the publications database
     database.publication.forEach((publications) => {
-        if(publications.id === request.body.pubId){
+        if(publications.id === request.body.pubId){      //we check publication id with body id
             return publications.books.push(request.params.isbn);
         }
     });
@@ -368,6 +366,128 @@ booky.put("/publication/update/book/:isbn", (request,response) => {
     return response.json({books: database.books, publications: database.publication, 
         message:"successfully updated publication"});
 });
+
+
+/*
+Route           /book/delete
+Description     delete a book
+Access          public
+Parameter       isbn
+Methods         DELETE
+*/
+
+booky.delete("/book/delete/:isbn", (request,response) => {
+    const updatedBookDatabase = database.books.filter((book) => {
+        book.ISBN !== request.params.isbn
+    });
+
+    database.books = updatedBookDatabase;
+    return response.json({books: database.books});
+});
+
+
+/*
+Route           /book/delete/author
+Description     delete an author from a book 
+Access          public
+Parameter       isbn, authorId
+Methods         DELETE
+*/
+
+booky.delete("/book/delete/author/:isbn/:authorId", (request,response) => {
+    
+    //update the book database
+    database.books.forEach((book) => {
+        if(book.ISBN === request.params.isbn){
+            const newAuthorList = book.author.filter((authors) => {
+                authors !== parseInt(request.params.authorId)
+            });
+            book.author = newAuthorList;
+            return;
+        }
+    });
+
+    //update the author database
+
+    database.author.forEach((authors) =>{
+        if(authors.id === parseInt(request.params.authorId)){
+            const newBooksList = authors.books.filter((book) => {
+                book !== request.params.isbn           //book.ISBN not required
+            });
+            authors.books = newBooksList;
+            return;
+        }
+    });
+    return response.json({books: database.books, authors: database.author, 
+        message:"author was deleted"});
+});
+
+
+/*
+Route           /author/delete
+Description     Delete an author
+Access          public
+Parameter       id
+Methods         DELETE
+*/
+
+
+booky.delete("/author/delete/:id", (request,response) => {
+    const newAuthorList = database.author.filter((authors) => {
+        authors.id !== parseInt(request.params.id)
+    });
+    database.author = newAuthorList;
+    return response.json({authors: database.author, message: "author is deleted"});
+});
+
+
+/*
+Route           /publication/delete
+Description     DElete the publication  
+Access          public
+Parameter       id
+Methods         DELETE
+*/
+
+booky.delete("/publication/delete/:id", (request,response) => {
+    const newPublicationList = database.publication.filter((publications) => {
+        publications.id !== parseInt(request.params.id)
+    });
+    database.publication = newPublicationList;
+    return response.json({publications: database.publication, message: "publication was deleted"});
+});
+
+
+/*
+Route           /publication/delete/book
+Description     Delete a book from publication 
+Access          public
+Parameter       isbn, publication id
+Methods         DELETE
+*/
+
+booky.delete("/publication/delete/book/:isbn/:pubId", (request,response) => {
+    //update  publication database
+    database.publication.forEach((publications) => {
+        if(publications.id === parseInt(request.params.pubId)){
+            const newBooksList = publications.books.filter((book) => 
+            (book) !== request.params.isbn
+            );
+            publications.books =newBooksList;
+            return;
+        }
+    }); 
+
+    //update book database
+    database.books.forEach((book) => {
+        if(book.ISBN === request.params.isbn){
+            book.publications = 0; //no publication available
+            return;
+        }
+    });
+    return response.json({books: database.books, publications: database.publication});
+});
+
 
 booky.listen(8080, () => console.log("Server is running!"));
 

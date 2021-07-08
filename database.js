@@ -1,4 +1,4 @@
-const books = [   //Array Of Objects
+let books = [   //Array Of Objects
     {             //data of 1 book
       ISBN: "12345Book",
       title: "Getting started with MERN",
@@ -6,7 +6,7 @@ const books = [   //Array Of Objects
       language: "en",
       numPage: 250,
       author: [1, 2],
-      publications: [1],
+      publications: 1,
       category: ["tech", "programming", "education", "thriller"],
     },
   ];
